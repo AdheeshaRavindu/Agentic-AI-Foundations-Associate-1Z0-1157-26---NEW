@@ -4,11 +4,21 @@ Study materials and a hands-on Cloudflare Agents demo for the Oracle Cloud Infra
 
 **Agentic AI Foundations Associate (1Z0-1157-26)**
 
-## Cloudflare Exam Concept Agent
+## Live demo — Exam Concept Agent
 
-Showcase of Brain + Hands + Loop + MCP (lookup, compare, quiz):
+Chat UI that shows the exam architecture in action:
 
-[cloudflare-lie-detector/](cloudflare-lie-detector/)
+- **Brain** — DeepSeek via OpenRouter
+- **Hands** — MCP tools (`lookup` · `compare` · `quiz` · `check_answer`)
+- **Loop** — Thought ? Action ? Observation (each tool call is visible)
+
+| | Link |
+|--|------|
+| **App** | https://agent47.adheesha.dev |
+| **MCP** | https://agent47.adheesha.dev/mcp |
+| **Source** | [exam-concept-agent/](exam-concept-agent/) |
+
+Ask things like “What is ReAct?”, “Compare CoT vs ReAct”, or “Quiz me on MCP”. Use **Clear** to reset the thread.
 
 ## Repository Structure
 
@@ -17,19 +27,23 @@ Showcase of Brain + Hands + Loop + MCP (lookup, compare, quiz):
 | [Introduction to AI Agents/](Introduction%20to%20AI%20Agents/) | Module 1 study guide and 12 practice questions |
 | [Agentic AI for Oracle AI Database/](Agentic%20AI%20for%20Oracle%20AI%20Database/) | 30-question full practice exam covering Modules 1–5 |
 | [LangChain for AI Agents/](LangChain%20for%20AI%20Agents/) | Hands-on Python exercises (work in progress) |
-| [cloudflare-lie-detector/](cloudflare-lie-detector/) | Exam Concept Agent (Workers + MCP) |
+| [exam-concept-agent/](exam-concept-agent/) | Exam Concept Agent (Cloudflare Workers + MCP) |
 
 ## Recommended Study Order
 
 1. Read `Introduction to AI Agents/introduction-to-ai-agents-v2.pdf` for core concepts (LLM vs agent, tools, orchestration, security).
 2. Test yourself with `Introduction to AI Agents/introduction-to-ai-agents-questions.pdf` (12 questions + answer key).
 3. Take the full practice exam in `Agentic AI for Oracle AI Database/oracle-1z0-1157-26-practice-exam-complete.pdf` (30 scenario questions).
-4. Run the Exam Concept Agent demo in `cloudflare-lie-detector/`.
+4. Run the Exam Concept Agent in `exam-concept-agent/` or open https://agent47.adheesha.dev.
 
 ## Branches
 
 - `main` — study materials (PDFs)
 - `practical` — labs and agent demos
+
+## Sharing
+
+Ready-to-paste GitHub About text, topics, and LinkedIn post: [SHARE.md](SHARE.md)
 
 ## Disclaimer
 
