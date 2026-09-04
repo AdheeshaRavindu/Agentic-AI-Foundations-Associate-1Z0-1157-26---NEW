@@ -1,0 +1,617 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exam Concept Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-0: #0a1014;
+        --bg-1: #101820;
+        --panel: rgba(18, 28, 36, 0.88);
+        --panel-solid: #121c24;
+        --line: rgba(140, 180, 170, 0.16);
+        --text: #e8f0ec;
+        --muted: #8fa39a;
+        --accent: #2ec4a0;
+        --accent-dim: rgba(46, 196, 160, 0.14);
+        --tool: #e6c35c;
+        --obs: #5fd4a0;
+        --user: #1a3340;
+        --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+        --radius: 16px;
+        --font: "DM Sans", sans-serif;
+        --display: "Syne", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font);
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 12% -10%, #16343a 0%, transparent 55%),
+          radial-gradient(900px 500px at 100% 0%, #12282f 0%, transparent 50%),
+          linear-gradient(180deg, var(--bg-1), var(--bg-0));
+        position: relative;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.35;
+        background-image:
+          linear-gradient(rgba(140, 180, 170, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(140, 180, 170, 0.04) 1px, transparent 1px);
+        background-size: 28px 28px;
+        mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+      }
+
+      .app {
+        position: relative;
+        z-index: 1;
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      .top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.15rem;
+      }
+
+      .eyebrow {
+        margin: 0 0 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0 0 0.45rem;
+        font-family: var(--display);
+        font-size: clamp(1.65rem, 4vw, 2.1rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+      }
+
+      .note {
+        margin: 0 0 0.9rem;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.5;
+        max-width: 36rem;
+      }
+
+      .pillars {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .pillars span {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 0.35rem;
+        font-size: 0.76rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: var(--accent-dim);
+        border: 1px solid var(--line);
+        color: var(--text);
+      }
+
+      .pillars strong {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .chat {
+        flex: 1;
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        min-height: 22rem;
+        max-height: min(58vh, 34rem);
+        overflow-y: auto;
+        padding: 1.1rem;
+        margin-bottom: 0.85rem;
+        scroll-behavior: smooth;
+      }
+
+      .msg {
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        animation: rise 0.28s ease-out;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .msg.user .bubble {
+        background: var(--user);
+        margin-left: 2.2rem;
+        border: 1px solid rgba(46, 196, 160, 0.18);
+      }
+
+      .msg.agent .bubble {
+        background: var(--panel-solid);
+        margin-right: 1rem;
+        border: 1px solid var(--line);
+      }
+
+      .bubble {
+        padding: 0.8rem 0.95rem;
+        border-radius: 14px;
+        white-space: pre-wrap;
+      }
+
+      .role {
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 0.3rem;
+      }
+
+      .loop {
+        margin: 0.55rem 0;
+        padding: 0.6rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--tool);
+        background: rgba(8, 14, 18, 0.65);
+      }
+
+      .loop .tag {
+        color: var(--tool);
+        font-weight: 700;
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+      }
+
+      .loop.obs {
+        border-left-color: var(--obs);
+      }
+
+      .loop.obs .tag {
+        color: var(--obs);
+      }
+
+      .loop pre {
+        margin: 0.35rem 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-family: ui-monospace, "Cascadia Code", monospace;
+      }
+
+      .pending {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        background: var(--panel-solid);
+        border: 1px solid var(--line);
+        margin-right: 1rem;
+      }
+
+      .pending-label {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .dots {
+        display: inline-flex;
+        gap: 0.28rem;
+        align-items: center;
+      }
+
+      .dots i {
+        width: 0.42rem;
+        height: 0.42rem;
+        border-radius: 50%;
+        background: var(--accent);
+        display: block;
+        animation: bounce 1.05s ease-in-out infinite;
+      }
+
+      .dots i:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+
+      .dots i:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.45;
+        }
+        40% {
+          transform: translateY(-5px);
+          opacity: 1;
+        }
+      }
+
+      .composer {
+        display: flex;
+        gap: 0.55rem;
+      }
+
+      .composer input {
+        flex: 1;
+        background: rgba(8, 14, 18, 0.85);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 0.8rem 0.95rem;
+        font: inherit;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .composer input:focus {
+        outline: none;
+        border-color: rgba(46, 196, 160, 0.55);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
+
+      .composer input::placeholder {
+        color: #6f837a;
+      }
+
+      button {
+        background: var(--accent);
+        color: #06201a;
+        border: none;
+        border-radius: 12px;
+        padding: 0.7rem 1.05rem;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+      }
+
+      button:hover:not(:disabled) {
+        filter: brightness(1.06);
+      }
+
+      button:active:not(:disabled) {
+        transform: scale(0.97);
+      }
+
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      button.secondary {
+        background: transparent;
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+
+      button.secondary:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.04);
+        filter: none;
+      }
+
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.75rem;
+      }
+
+      .suggestions button {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.42rem 0.7rem;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 0.55rem;
+        min-height: 1.2rem;
+      }
+
+      details.tools {
+        margin-top: 1.1rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      details.tools summary {
+        cursor: pointer;
+        color: var(--text);
+      }
+
+      details.tools code {
+        color: var(--accent);
+        font-size: 0.8rem;
+      }
+
+      @media (max-width: 560px) {
+        .top {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        #clear {
+          align-self: flex-end;
+        }
+
+        .msg.user .bubble {
+          margin-left: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div>
+          <p class="eyebrow">1Z0-1157-26</p>
+          <h1>Exam Concept Agent</h1>
+          <p class="note">
+            Ask in natural language. The agent (Brain) decides which MCP tools
+            (Hands) to call in a ReAct loop — each Action and Observation is
+            visible below.
+          </p>
+          <div class="pillars">
+            <span><strong>Brain</strong> DeepSeek via OpenRouter</span>
+            <span><strong>Hands</strong> MCP tools (lookup · compare · quiz)</span>
+            <span><strong>Loop</strong> Thought → Action → Observation</span>
+          </div>
+        </div>
+        <button type="button" id="clear" class="secondary">Clear</button>
+      </header>
+
+      <div id="chat" class="chat" aria-live="polite"></div>
+
+      <form id="form" class="composer">
+        <input
+          id="input"
+          autocomplete="off"
+          placeholder="e.g. What is ReAct? Compare CoT and ReAct. Quiz me."
+        />
+        <button type="submit" id="send">Ask agent</button>
+      </form>
+      <div class="suggestions">
+        <button type="button" class="secondary sugg" data-q="What is ReAct?">
+          What is ReAct?
+        </button>
+        <button
+          type="button"
+          class="secondary sugg"
+          data-q="Compare CoT and ReAct"
+        >
+          Compare CoT vs ReAct
+        </button>
+        <button type="button" class="secondary sugg" data-q="Quiz me on MCP">
+          Quiz me on MCP
+        </button>
+        <button
+          type="button"
+          class="secondary sugg"
+          data-q="Explain defense-in-depth guardrails"
+        >
+          Guardrails
+        </button>
+      </div>
+      <div id="status" class="status"></div>
+
+      <details class="tools">
+        <summary>MCP tools available</summary>
+        <p>
+          <code>lookup_concept</code>, <code>compare_concepts</code>,
+          <code>quiz_me</code>, <code>check_answer</code> — also served at
+          <code>/mcp</code>
+        </p>
+      </details>
+    </main>
+    <script>
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const send = document.getElementById("send");
+      const clearBtn = document.getElementById("clear");
+      const status = document.getElementById("status");
+      const suggButtons = document.querySelectorAll(".sugg");
+
+      const WELCOME =
+        "Hi — ask me about ReAct, MCP, CoT, guardrails, or say “Quiz me”. I’ll call tools and show each Action → Observation step.";
+
+      function setBusy(busy) {
+        send.disabled = busy;
+        clearBtn.disabled = busy;
+        suggButtons.forEach(function (btn) {
+          btn.disabled = busy;
+        });
+      }
+
+      function showPending() {
+        hidePending();
+        const el = document.createElement("div");
+        el.className = "msg agent";
+        el.id = "pending";
+        el.innerHTML =
+          '<div class="role">Agent</div>' +
+          '<div class="pending" aria-label="Agent thinking">' +
+          '<span class="dots"><i></i><i></i><i></i></span>' +
+          '<span class="pending-label">Thinking · may call tools…</span>' +
+          "</div>";
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function hidePending() {
+        const pending = document.getElementById("pending");
+        if (pending) pending.remove();
+      }
+
+      function addUser(text) {
+        const el = document.createElement("div");
+        el.className = "msg user";
+        el.innerHTML =
+          '<div class="role">You</div><div class="bubble"></div>';
+        el.querySelector(".bubble").textContent = text;
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function addAgent(answer, steps) {
+        const el = document.createElement("div");
+        el.className = "msg agent";
+        const role = document.createElement("div");
+        role.className = "role";
+        role.textContent = "Agent (Brain + Tools)";
+        el.appendChild(role);
+
+        (steps || []).forEach(function (step) {
+          const action = document.createElement("div");
+          action.className = "loop";
+          action.innerHTML =
+            '<div class="tag">ACTION → ' +
+            escapeHtml(step.name) +
+            "</div><pre></pre>";
+          action.querySelector("pre").textContent = JSON.stringify(
+            step.args,
+            null,
+            2
+          );
+          el.appendChild(action);
+
+          const obs = document.createElement("div");
+          obs.className = "loop obs";
+          obs.innerHTML =
+            '<div class="tag">OBSERVATION</div><pre></pre>';
+          obs.querySelector("pre").textContent = JSON.stringify(
+            step.result,
+            null,
+            2
+          );
+          el.appendChild(obs);
+        });
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = answer;
+        el.appendChild(bubble);
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function resetChat() {
+        chat.innerHTML = "";
+        status.textContent = "";
+        addAgent(WELCOME, []);
+        input.focus();
+      }
+
+      async function ask(message) {
+        if (!message) return;
+        addUser(message);
+        input.value = "";
+        setBusy(true);
+        showPending();
+        status.textContent = "Running ReAct loop…";
+        try {
+          const res = await fetch("/api/agent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+          });
+          const data = await res.json();
+          hidePending();
+          if (!res.ok) {
+            addAgent(data.error || "Request failed", []);
+            status.textContent = "";
+            return;
+          }
+          if (!data.steps || data.steps.length === 0) {
+            status.textContent =
+              "Note: no tools were called — try asking for a concept, comparison, or quiz.";
+          } else {
+            status.textContent =
+              "Used " + data.steps.length + " tool call(s).";
+          }
+          addAgent(data.answer, data.steps);
+        } catch (e) {
+          hidePending();
+          addAgent(String(e), []);
+          status.textContent = "";
+        } finally {
+          setBusy(false);
+          input.focus();
+        }
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        ask(input.value.trim());
+      });
+
+      clearBtn.addEventListener("click", function () {
+        if (clearBtn.disabled) return;
+        resetChat();
+      });
+
+      suggButtons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (btn.disabled) return;
+          ask(btn.getAttribute("data-q"));
+        });
+      });
+
+      resetChat();
+    </script>
+  </body>
+</html>
