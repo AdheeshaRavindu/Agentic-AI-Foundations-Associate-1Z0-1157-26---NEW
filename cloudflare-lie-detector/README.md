@@ -47,6 +47,17 @@ Open http://localhost:8787 — ask a question and watch tool calls appear.
 
 **Restart `npm run dev` after changing `.dev.vars`.**
 
+## Rate limits (per IP)
+
+Cloudflare Workers Rate Limiting bindings (plus edge DDoS protection):
+
+| Route | Limit |
+|-------|-------|
+| `POST /api/agent` | 10 requests / 60s |
+| Other `/api/*`, `/mcp`, `/agents/*` | 60 requests / 60s |
+
+Over limit returns `429` with `Retry-After: 60`. Static UI assets are not app-rate-limited.
+
 ## Deploy
 
 ```bash
@@ -54,11 +65,16 @@ npx wrangler secret put OPENROUTER_API_KEY
 npm run deploy
 ```
 
+After deploy:
+
+- UI: `https://exam-concept-agent.<your-subdomain>.workers.dev/`
+- MCP (Streamable HTTP): `https://exam-concept-agent.<your-subdomain>.workers.dev/mcp`
+
 ## Architecture routes
 
 | Path | Role |
 |------|------|
 | `/` | Chat UI with visible ReAct tool loop |
-| `POST /api/agent` | DeepSeek + tools; returns `{ answer, steps }` |
+| `POST /api/agent` | OpenRouter + tools; returns `{ answer, steps }` |
 | `/mcp` | Streamable HTTP MCP server |
 | `/agents/exam-concept-chat/*` | Durable Object chat agent |

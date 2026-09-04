@@ -7,4 +7,6 @@ interface Env {
   >;
   ASSETS: Fetcher;
   OPENROUTER_API_KEY: string;
+  RATE_LIMIT_AGENT: RateLimit;
+  RATE_LIMIT_API: RateLimit;
 }

@@ -3,6 +3,7 @@ import { runExamAgent } from "./agent-run";
 import { ExamConceptChat } from "./chat-agent";
 import { validateInput } from "./guardrails";
 import { ExamConceptMCP } from "./mcp-server";
+import { clientIp, enforceRateLimit } from "./rate-limit";
 import { compareConcepts } from "./tools/compare";
 import { lookupConcept } from "./tools/lookup";
 import { checkAnswer, quizMe } from "./tools/quiz";
@@ -16,14 +17,22 @@ export default {
     ctx: ExecutionContext
   ): Promise<Response> {
     const url = new URL(request.url);
+    const ip = clientIp(request);
 
     if (url.pathname.startsWith("/mcp")) {
+      const limited = await enforceRateLimit(env.RATE_LIMIT_API, `mcp:${ip}`);
+      if (limited) return limited;
       return ExamConceptMCP.serve("/mcp", {
         binding: "ExamConceptMCP"
       }).fetch(request, env, ctx);
     }
 
     if (url.pathname === "/api/agent" && request.method === "POST") {
+      const limited = await enforceRateLimit(
+        env.RATE_LIMIT_AGENT,
+        `agent:${ip}`
+      );
+      if (limited) return limited;
       try {
         const body = (await request.json()) as { message?: unknown };
         const validated = validateInput(body.message);
@@ -40,6 +49,11 @@ export default {
           err instanceof Error ? err.message : "Agent run failed.";
         return Response.json({ error: message }, { status: 500 });
       }
+    }
+
+    if (url.pathname.startsWith("/api/")) {
+      const limited = await enforceRateLimit(env.RATE_LIMIT_API, `api:${ip}`);
+      if (limited) return limited;
     }
 
     if (url.pathname === "/api/lookup" && request.method === "POST") {
@@ -111,6 +125,14 @@ export default {
       } catch {
         return Response.json({ error: "Invalid JSON body." }, { status: 400 });
       }
+    }
+
+    if (url.pathname.startsWith("/agents/")) {
+      const limited = await enforceRateLimit(
+        env.RATE_LIMIT_API,
+        `agents:${ip}`
+      );
+      if (limited) return limited;
     }
 
     const agentResponse = await routeAgentRequest(request, env);

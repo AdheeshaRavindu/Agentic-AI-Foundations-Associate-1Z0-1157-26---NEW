@@ -16,6 +16,21 @@
       "new_sqlite_classes": ["ExamConceptChat", "ExamConceptMCP"]
     }
   ],
+  "ratelimits": [
+    {
+      "name": "RATE_LIMIT_AGENT",
+      "namespace_id": "11571",
+      "simple": { "limit": 10, "period": 60 }
+    },
+    {
+      "name": "RATE_LIMIT_API",
+      "namespace_id": "11572",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
