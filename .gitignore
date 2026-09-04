@@ -1,4 +1,4 @@
-# Python
+﻿# Python
 **/.venv/
 venv/
 __pycache__/
@@ -33,3 +33,6 @@ desktop.ini
 
 # Cursor
 .cursor/
+node_modules/
+.wrangler/
+.dev.vars

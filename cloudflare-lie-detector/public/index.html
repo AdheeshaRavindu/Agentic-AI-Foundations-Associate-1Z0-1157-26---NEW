@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Exam Concept Agent</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0f1419;
+        --panel: #1a2332;
+        --text: #e7ecf3;
+        --muted: #9aa8b8;
+        --accent: #3d9cf0;
+        --tool: #f0c14d;
+        --obs: #7ee0a3;
+        --ok: #3dd68c;
+        --bad: #ff7b72;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: radial-gradient(ellipse at top, #1a2740, var(--bg));
+        color: var(--text);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 44rem;
+        margin: 0 auto;
+        padding: 1.25rem 1.5rem 2rem;
+      }
+      h1 {
+        font-size: 1.55rem;
+        margin: 0 0 0.3rem;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin: 0 0 1rem;
+        line-height: 1.45;
+      }
+      .pillars {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1rem;
+      }
+      .pillars span {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        background: #243044;
+        color: var(--muted);
+        border: 1px solid #2a3548;
+      }
+      #chat {
+        background: var(--panel);
+        border: 1px solid #2a3548;
+        border-radius: 12px;
+        min-height: 22rem;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+      }
+      .msg {
+        margin-bottom: 0.85rem;
+        line-height: 1.45;
+      }
+      .msg.user .bubble {
+        background: #243a56;
+        margin-left: 2rem;
+      }
+      .msg.agent .bubble {
+        background: #121a24;
+        margin-right: 1rem;
+        border: 1px solid #2a3548;
+      }
+      .bubble {
+        padding: 0.7rem 0.85rem;
+        border-radius: 10px;
+        white-space: pre-wrap;
+      }
+      .role {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        margin-bottom: 0.25rem;
+      }
+      .loop {
+        margin: 0.55rem 0;
+        padding: 0.55rem 0.7rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        border-left: 3px solid var(--tool);
+        background: #0f1419;
+      }
+      .loop .tag {
+        color: var(--tool);
+        font-weight: 650;
+        font-size: 0.75rem;
+      }
+      .loop.obs {
+        border-left-color: var(--obs);
+      }
+      .loop.obs .tag {
+        color: var(--obs);
+      }
+      .loop pre {
+        margin: 0.35rem 0 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+      .composer {
+        display: flex;
+        gap: 0.5rem;
+      }
+      .composer input {
+        flex: 1;
+        background: #0f1419;
+        color: var(--text);
+        border: 1px solid #2a3548;
+        border-radius: 8px;
+        padding: 0.7rem 0.8rem;
+      }
+      button {
+        background: var(--accent);
+        color: #061018;
+        border: none;
+        border-radius: 8px;
+        padding: 0.55rem 0.95rem;
+        font-weight: 650;
+        cursor: pointer;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      button.secondary {
+        background: #2a3548;
+        color: var(--text);
+      }
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.65rem;
+      }
+      .suggestions button {
+        font-size: 0.8rem;
+        font-weight: 500;
+        padding: 0.4rem 0.65rem;
+      }
+      .status {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        min-height: 1.2rem;
+      }
+      details.tools {
+        margin-top: 1rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Exam Concept Agent</h1>
+      <p class="note">
+        Ask in natural language. The agent (Brain) decides which MCP tools
+        (Hands) to call in a ReAct loop — you can see each tool call and
+        observation below.
+      </p>
+      <div class="pillars">
+        <span>Brain: openrouter · deepseek/deepseek-chat</span>
+        <span>Hands: MCP tools</span>
+        <span>Loop: Thought → Action → Observation</span>
+      </div>
+
+      <div id="chat" aria-live="polite"></div>
+
+      <form id="form" class="composer">
+        <input
+          id="input"
+          autocomplete="off"
+          placeholder="e.g. What is ReAct? Compare CoT and ReAct. Quiz me."
+        />
+        <button type="submit" id="send">Ask agent</button>
+      </form>
+      <div class="suggestions">
+        <button type="button" class="secondary sugg" data-q="What is ReAct?">
+          What is ReAct?
+        </button>
+        <button
+          type="button"
+          class="secondary sugg"
+          data-q="Compare CoT and ReAct"
+        >
+          Compare CoT vs ReAct
+        </button>
+        <button type="button" class="secondary sugg" data-q="Quiz me on MCP">
+          Quiz me on MCP
+        </button>
+        <button
+          type="button"
+          class="secondary sugg"
+          data-q="Explain defense-in-depth guardrails"
+        >
+          Guardrails
+        </button>
+      </div>
+      <div id="status" class="status"></div>
+
+      <details class="tools">
+        <summary>MCP tools available</summary>
+        <p>
+          <code>lookup_concept</code>, <code>compare_concepts</code>,
+          <code>quiz_me</code>, <code>check_answer</code> — also served at
+          <code>/mcp</code>
+        </p>
+      </details>
+    </main>
+    <script>
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const send = document.getElementById("send");
+      const status = document.getElementById("status");
+
+      function addUser(text) {
+        const el = document.createElement("div");
+        el.className = "msg user";
+        el.innerHTML =
+          '<div class="role">You</div><div class="bubble"></div>';
+        el.querySelector(".bubble").textContent = text;
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function addAgent(answer, steps) {
+        const el = document.createElement("div");
+        el.className = "msg agent";
+        const role = document.createElement("div");
+        role.className = "role";
+        role.textContent = "Agent (Brain + Tools)";
+        el.appendChild(role);
+
+        (steps || []).forEach(function (step) {
+          const action = document.createElement("div");
+          action.className = "loop";
+          action.innerHTML =
+            '<div class="tag">ACTION → ' +
+            escapeHtml(step.name) +
+            "</div><pre></pre>";
+          action.querySelector("pre").textContent = JSON.stringify(
+            step.args,
+            null,
+            2
+          );
+          el.appendChild(action);
+
+          const obs = document.createElement("div");
+          obs.className = "loop obs";
+          obs.innerHTML =
+            '<div class="tag">OBSERVATION</div><pre></pre>';
+          obs.querySelector("pre").textContent = JSON.stringify(
+            step.result,
+            null,
+            2
+          );
+          el.appendChild(obs);
+        });
+
+        const bubble = document.createElement("div");
+        bubble.className = "bubble";
+        bubble.textContent = answer;
+        el.appendChild(bubble);
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      async function ask(message) {
+        if (!message) return;
+        addUser(message);
+        input.value = "";
+        send.disabled = true;
+        status.textContent =
+          "Agent thinking… (may call tools in a ReAct loop)";
+        try {
+          const res = await fetch("/api/agent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message })
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            addAgent(data.error || "Request failed", []);
+            status.textContent = "";
+            return;
+          }
+          if (!data.steps || data.steps.length === 0) {
+            status.textContent =
+              "Note: no tools were called — try asking for a concept, comparison, or quiz.";
+          } else {
+            status.textContent =
+              "Used " + data.steps.length + " tool call(s).";
+          }
+          addAgent(data.answer, data.steps);
+        } catch (e) {
+          addAgent(String(e), []);
+          status.textContent = "";
+        } finally {
+          send.disabled = false;
+          input.focus();
+        }
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        ask(input.value.trim());
+      });
+
+      document.querySelectorAll(".sugg").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          ask(btn.getAttribute("data-q"));
+        });
+      });
+
+      addAgent(
+        "Hi — ask me about ReAct, MCP, CoT, guardrails, or say “Quiz me”. I’ll call tools and show each Action → Observation step.",
+        []
+      );
+    </script>
+  </body>
+</html>

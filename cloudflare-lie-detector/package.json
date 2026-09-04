@@ -1,0 +1,27 @@
+{
+  "name": "exam-concept-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "types": "wrangler types",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.0",
+    "@cloudflare/ai-chat": "^0.11.0",
+    "@modelcontextprotocol/client": "^2.0.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@modelcontextprotocol/server": "^2.0.0",
+    "agents": "^0.22.0",
+    "ai": "^6.0.64",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250525.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^4.19.1"
+  }
+}
